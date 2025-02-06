@@ -77,7 +77,7 @@ app.post('/game', (req, res) => {
 
     const options = {
         hostname: 'yourapp.azurewebsites.net', // Ensure this is the Azure-hosted domain
-        path: '/api/game',
+        path: '/game',
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
