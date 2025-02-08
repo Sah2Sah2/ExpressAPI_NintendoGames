@@ -61,12 +61,14 @@
             text-shadow: 2px 2px #000;
             margin-bottom: 20px;
         }
+
         h2 {
             text-align: center;
             font-size: 18px; 
             margin-top: 20px;
             color: #000;
         }
+
         input[type="text"], input[type="number"], button {
             width: 100%;
             padding: 12px;
@@ -76,10 +78,12 @@
             font-family: 'Press Start 2P', cursive;
             box-sizing: border-box;
         }
+
         input[type="text"], input[type="number"] {
             background: #fff;
             color: #333;
         }
+
         button {
             background-color: #e60012;
             color: white;
@@ -87,12 +91,15 @@
             text-transform: uppercase;
             font-size: 16px;
         }
+
         button:hover {
             background-color: #ff4d4d;
         }
+
         .game-list, .game-detail {
             margin-top: 30px;
         }
+
         .game-item {
             background: #ffe600;
             padding: 15px;
@@ -102,20 +109,39 @@
             font-weight: bold;
             font-size: 18px;
         }
+
         .game-item p {
             margin: 5px 0;
         }
+
         .game-detail h2 {
             margin-top: 20px;
             color: #e60012;
         }
+
         .game-detail p {
             font-size: 18px;
         }
+
         .alert {
             color: red;
             font-size: 18px;
             text-align: center;
+        }
+
+        #loadingMessage {
+            color: yellow;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            .game-item {
+                font-size: 16px;
+            }
         }
 
         @media (max-width: 600px) {
@@ -124,7 +150,6 @@
             }
         }
     </style>
-    
 </head>
 <body>
     <div class="wrapper">
@@ -149,28 +174,55 @@
                 <button onclick="addNewGame()">Add Game</button>
             </div>
 
+            <div id="loadingMessage" style="display:none;">Loading...</div>
             <div id="alertMessage" class="alert"></div>
             <div class="game-list" id="gameList"></div>
             <div class="game-detail" id="gameDetail"></div>
         </div>
+    </div>
 
     <script>
         const API_URL = 'https://nintendogamesminimalapi.azurewebsites.net/games'; // Link to Azure
 
+        function showLoading() {
+            document.getElementById('loadingMessage').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingMessage').style.display = 'none';
+        }
+
+        function showError(message) {
+            const alertMessage = document.getElementById('alertMessage');
+            alertMessage.textContent = message;
+            setTimeout(() => {
+                alertMessage.textContent = '';
+            }, 3000);
+        }
+
         function fetchAllGames() {
+            showLoading();
             fetch(API_URL)
                 .then(response => response.json())
-                .then(data => displayGames(data))
-                .catch(error => console.error('Error:', error));
+                .then(data => {
+                    hideLoading();
+                    displayGames(data);
+                })
+                .catch(error => {
+                    hideLoading();
+                    console.error('Error:', error);
+                    showError('Failed to load games');
+                });
         }
 
         function fetchGameByName() {
             const gameName = document.getElementById('gameName').value;
             if (!gameName) {
-                showAlert('Please enter a game name.');
+                showError('Please enter a game name.');
                 return;
             }
 
+            showLoading();
             fetch(`${API_URL}/${encodeURIComponent(gameName)}`)
                 .then(response => {
                     if (!response.ok) {
@@ -178,9 +230,13 @@
                     }
                     return response.json();
                 })
-                .then(data => displayGameDetail(data))
+                .then(data => {
+                    hideLoading();
+                    displayGameDetail(data);
+                })
                 .catch(error => {
-                    showAlert(error.message);
+                    hideLoading();
+                    showError(error.message);
                     document.getElementById('gameDetail').innerHTML = '';
                 });
         }
@@ -214,17 +270,23 @@
             const newGameDeveloper = document.getElementById('newGameDeveloper').value;
 
             if (!newGameName || !newGameGenre || !newGameReleaseYear || !newGameDeveloper) {
-                alert('Please fill in all the fields.');
+                showError('Please fill in all the fields.');
+                return;
+            }
+
+            if (isNaN(newGameReleaseYear) || newGameReleaseYear < 1900 || newGameReleaseYear > new Date().getFullYear()) {
+                showError('Please enter a valid release year.');
                 return;
             }
 
             const newGame = {
-                name: newGameName,                  // Match MongoDB field name: name
-                genre: newGameGenre,                // Match MongoDB field name: genre
-                releaseYear: newGameReleaseYear,    // Match MongoDB field name: releaseYear
-                developer: newGameDeveloper         // Match MongoDB field name: developer
+                name: newGameName,
+                genre: newGameGenre,
+                releaseYear: newGameReleaseYear,
+                developer: newGameDeveloper
             };
 
+            showLoading();
             fetch(API_URL, {
                 method: 'POST',
                 headers: {
@@ -233,6 +295,7 @@
                 body: JSON.stringify(newGame),
             })
             .then(response => {
+                hideLoading();
                 if (!response.ok) {
                     throw new Error('Failed to add the game');
                 }
@@ -240,23 +303,15 @@
                 fetchAllGames(); // Refresh the list after adding a new game
             })
             .catch(error => {
+                hideLoading();
                 console.error('Error:', error);
-                alert('Error adding the game');
+                showError('Error adding the game');
             });
-        }
-
-        function showAlert(message) {
-            const alertMessage = document.getElementById('alertMessage');
-            alertMessage.textContent = message;
-            setTimeout(() => {
-                alertMessage.textContent = '';
-            }, 3000);
         }
     </script>
 
     <footer>
         Consult the API documentation <a href="index.html"> here.</a>
     </footer>
-</div>
 </body>
 </html>
