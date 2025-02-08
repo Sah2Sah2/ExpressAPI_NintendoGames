@@ -4,7 +4,7 @@ const app = express();
 
 app.use(express.json()); // The code in the db is written in JSON
 
-const DOTNET_API_URL = 'https://localhost:7258'; // Your .NET API URL on Azure (ensure it's HTTPS)
+const DOTNET_API_URL = 'https://nintendogamesminimalapi.azurewebsites.net'; // .NET API URL on Azure or local host to test locally
 
 // Get all games from the .NET API
 app.get('/game', (req, res) => {
@@ -32,7 +32,8 @@ app.get('/game', (req, res) => {
 app.get('/game/:name', (req, res) => {
     const gameName = req.params.name;
 
-    https.get(`${DOTNET_API_URL}/api/game?name=${gameName}`, (response) => {
+    // Send request to the .NET API with the query parameter
+    https.get(`${DOTNET_API_URL}/game?name=${gameName}`, (response) => {
         let data = '';
 
         response.on('data', (chunk) => {
@@ -56,6 +57,7 @@ app.get('/game/:name', (req, res) => {
     });
 });
 
+
 // Add a new game to the .NET API
 app.post('/game', (req, res) => {
     // Extract game data from request body
@@ -76,7 +78,7 @@ app.post('/game', (req, res) => {
     const newGameJson = JSON.stringify(newGame);
 
     const options = {
-        hostname: 'yourapp.azurewebsites.net', // Ensure this is the Azure-hosted domain
+        hostname: 'https://nintendogamesminimalapi.azurewebsites.net/games', // Azure-hosted domain to fill in 
         path: '/game',
         method: 'POST',
         headers: {
@@ -110,7 +112,7 @@ app.post('/game', (req, res) => {
     request.end();
 });
 
-// Start the local server (HTTP since you're running this locally)
+// Start the local server 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Node API running on port ${PORT}`);
