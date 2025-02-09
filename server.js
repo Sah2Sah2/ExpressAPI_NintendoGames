@@ -1,8 +1,15 @@
 const https = require('https');
 const express = require("express");
+const cors = require('cors'); // Import cors module
 const app = express();
 
 app.use(express.json()); // The code in the db is written in JSON
+
+// Allow requests from your UI's origin
+app.use(cors({
+    origin: 'http://127.0.0.1:5500', // or your frontend URL
+}));
+
 
 const DOTNET_API_URL = 'https://nintendogamesminimalapi.azurewebsites.net'; // .NET API URL on Azure or local host to test locally
 
@@ -78,7 +85,7 @@ app.post('/game', (req, res) => {
     const newGameJson = JSON.stringify(newGame);
 
     const options = {
-        hostname: 'https://nintendogamesminimalapi.azurewebsites.net/games', // Azure-hosted domain to fill in 
+        hostname: 'nintendogamesminimalapi.azurewebsites.net', // Azure-hosted domain to fill in 
         path: '/game',
         method: 'POST',
         headers: {
