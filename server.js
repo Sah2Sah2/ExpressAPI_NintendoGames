@@ -76,18 +76,15 @@ app.post('/game', (req, res) => {
     }
 
     const newGame = {
-        name,            // Name of the game
-        genre,           // Genre of the game
-        releaseYear,     // Release year of the game
-        developer        // Developer of the game
+        name,
+        genre,
+        releaseYear,
+        developer
     };
 
-    // Convert the new game object to JSON string
-    const newGameJson = JSON.stringify(newGame);
-
     const options = {
-        hostname: 'nintendogamesminimalapi.azurewebsites.net', // Azure-hosted domain to fill in 
-        path: '/game',
+        hostname: 'nintendogamesminimalapi.azurewebsites.net',
+        path: '/game',  // Ensure this path matches the correct endpoint in the .NET API
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -97,13 +94,12 @@ app.post('/game', (req, res) => {
 
     const request = https.request(options, (response) => {
         let data = '';
-
         response.on('data', (chunk) => {
             data += chunk;
         });
-
+        
         response.on('end', () => {
-            if (response.statusCode === 201) {
+            if (response.statusCode === 200 || response.statusCode === 201) {
                 res.status(201).send('Game successfully added to the .NET API!');
             } else {
                 res.status(response.statusCode).send(`Failed to add game: ${data}`);
@@ -116,9 +112,11 @@ app.post('/game', (req, res) => {
         res.status(500).send('Error connecting to the .NET API');
     });
 
-    request.write(newGameJson);  // Send the game data
+    // Send the data as a JSON string
+    request.write(JSON.stringify(newGame));  
     request.end();
 });
+
 
 // Start the local server 
 const PORT = process.env.PORT || 3000;

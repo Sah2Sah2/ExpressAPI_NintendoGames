@@ -220,44 +220,43 @@
 
 
         function fetchGameByName() {
-        const gameName = document.getElementById('gameName').value.trim(); // Trim spaces
-        if (!gameName) {
-            showError('Please enter a game name.');
-            return;
-        }
+            const gameName = document.getElementById('gameName').value.trim(); // Trim spaces
+            if (!gameName) {
+                showError('Please enter a game name.');
+                return;
+            }
 
-        showLoading();
-        const searchUrl = `https://nintendogamesminimalapi.azurewebsites.net/game?name=${encodeURIComponent(gameName.toLowerCase())}`; // Convert to lowercase and encode
-        console.log("Search URL:", searchUrl); // Log the search URL to inspect it
+            showLoading();
+            const searchUrl = `https://nintendogamesminimalapi.azurewebsites.net/game?name=${encodeURIComponent(gameName.toLowerCase())}`; // Convert to lowercase and encode
+            console.log("Search URL:", searchUrl); 
 
-        // Clear previous game details and game list before making the new request
-        document.getElementById('gameList').innerHTML = '';  // Clear the game list
-        document.getElementById('gameDetail').innerHTML = '';  // Clear game details
+            // Clear previous game details and game list before making the new request
+            document.getElementById('gameList').innerHTML = ''; 
+            document.getElementById('gameDetail').innerHTML = '';  
 
-        fetch(searchUrl)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Game not found');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log("API Response:", data); // Log the API response to check the data structure
-                hideLoading();
-                if (data.length > 0) { // Check if the array contains any games
-                    displayGameDetail(data[0]); // Display the first game if it's found
-                } else {
-                    showError('Game not found.');
-                    document.getElementById('gameDetail').innerHTML = ''; // Ensure detail is cleared
-                }
-            })
-            .catch(error => {
-                hideLoading();
-                showError(error.message);
-                document.getElementById('gameDetail').innerHTML = ''; // Ensure detail is cleared
-            });
-        }
-
+            fetch(searchUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Game not found');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("API Response:", data); 
+                    hideLoading();
+                    if (data.length > 0) { // Check if the array contains any games
+                        displayGames(data); // Call the function to display all the games
+                    } else {
+                        showError('Game not found.');
+                        document.getElementById('gameDetail').innerHTML = ''; 
+                    }
+                })
+                .catch(error => {
+                    hideLoading();
+                    showError(error.message);
+                    document.getElementById('gameDetail').innerHTML = ''; 
+                });
+         }
 
         function displayGames(games) {
             const gameList = document.getElementById('gameList');
@@ -271,7 +270,7 @@
             games.forEach(game => {
                 const gameItem = document.createElement('div');
                 gameItem.className = 'game-item';
-                const gameName = game.name || "Unknown Name"; // Fallback if name is undefined
+                const gameName = game.name || "Unknown Name"; 
                 gameItem.innerHTML = `<strong>${gameName}</strong>`;
                 gameList.appendChild(gameItem);
             });
@@ -294,11 +293,13 @@
             const newGameReleaseYear = document.getElementById('newGameReleaseYear').value;
             const newGameDeveloper = document.getElementById('newGameDeveloper').value;
 
+            // Validate input fields
             if (!newGameName || !newGameGenre || !newGameReleaseYear || !newGameDeveloper) {
                 showError('Please fill in all the fields.');
                 return;
             }
 
+            // Validate the release year
             if (isNaN(newGameReleaseYear) || newGameReleaseYear < 1900 || newGameReleaseYear > new Date().getFullYear()) {
                 showError('Please enter a valid release year.');
                 return;
@@ -307,17 +308,21 @@
             const newGame = {
                 name: newGameName,
                 genre: newGameGenre,
-                releaseYear: newGameReleaseYear,
+                releaseYear: parseInt(newGameReleaseYear), // Ensure the year is a number
                 developer: newGameDeveloper
             };
 
             showLoading();
+
+            // Update API URL if needed
+            const API_URL = 'https://nintendogamesminimalapi.azurewebsites.net/game'; 
+
             fetch(API_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(newGame),
+                body: JSON.stringify(newGame), // Send the new game data as JSON
             })
             .then(response => {
                 hideLoading();
@@ -325,7 +330,7 @@
                     throw new Error('Failed to add the game');
                 }
                 alert('Game added successfully!');
-                fetchAllGames(); // Refresh the list after adding a new game
+                fetchAllGames(); // Refresh the game list after adding a new game
             })
             .catch(error => {
                 hideLoading();
@@ -333,6 +338,7 @@
                 showError('Error adding the game');
             });
         }
+
     </script>
 
     <footer>
