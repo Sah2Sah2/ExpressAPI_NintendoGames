@@ -202,19 +202,22 @@
         }
 
         function fetchAllGames() {
-            showLoading();
-            fetch(API_URL)
-                .then(response => response.json())
-                .then(data => {
-                    hideLoading();
-                    displayGames(data);
-                })
-                .catch(error => {
-                    hideLoading();
-                    console.error('Error:', error);
-                    showError('Failed to load games');
-                });
+        showLoading();
+        document.getElementById('gameList').innerHTML = '';  // Clear the game list
+        document.getElementById('gameDetail').innerHTML = '';  // Clear game details
+        fetch(API_URL)
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                displayGames(data);
+            })
+            .catch(error => {
+                hideLoading();
+                console.error('Error:', error);
+                showError('Failed to load games');
+            });
         }
+
 
         function fetchGameByName() {
         const gameName = document.getElementById('gameName').value.trim(); // Trim spaces
@@ -227,8 +230,9 @@
         const searchUrl = `https://nintendogamesminimalapi.azurewebsites.net/game?name=${encodeURIComponent(gameName.toLowerCase())}`; // Convert to lowercase and encode
         console.log("Search URL:", searchUrl); // Log the search URL to inspect it
 
-        // Clear previous game details
-        document.getElementById('gameDetail').innerHTML = '';
+        // Clear previous game details and game list before making the new request
+        document.getElementById('gameList').innerHTML = '';  // Clear the game list
+        document.getElementById('gameDetail').innerHTML = '';  // Clear game details
 
         fetch(searchUrl)
             .then(response => {
@@ -244,35 +248,35 @@
                     displayGameDetail(data[0]); // Display the first game if it's found
                 } else {
                     showError('Game not found.');
-                    document.getElementById('gameDetail').innerHTML = '';
+                    document.getElementById('gameDetail').innerHTML = ''; // Ensure detail is cleared
                 }
             })
             .catch(error => {
                 hideLoading();
                 showError(error.message);
-                document.getElementById('gameDetail').innerHTML = '';
+                document.getElementById('gameDetail').innerHTML = ''; // Ensure detail is cleared
             });
         }
 
 
         function displayGames(games) {
-        const gameList = document.getElementById('gameList');
-        gameList.innerHTML = '';
-        
-        if (games.length === 0) {
-            gameList.innerHTML = '<p>No games found.</p>';
-            return;
+            const gameList = document.getElementById('gameList');
+            gameList.innerHTML = ''; // Clear the game list each time
+
+            if (games.length === 0) {
+                gameList.innerHTML = '<p>No games found.</p>';
+                return;
+            }
+
+            games.forEach(game => {
+                const gameItem = document.createElement('div');
+                gameItem.className = 'game-item';
+                const gameName = game.name || "Unknown Name"; // Fallback if name is undefined
+                gameItem.innerHTML = `<strong>${gameName}</strong>`;
+                gameList.appendChild(gameItem);
+            });
         }
 
-        games.forEach(game => {
-            const gameItem = document.createElement('div');
-            gameItem.className = 'game-item';
-            // Check if the 'name' field exists and is valid
-            const gameName = game.name || "Unknown Name";  // Fallback in case name is undefined
-            gameItem.innerHTML = `<strong>${gameName}</strong>`;
-            gameList.appendChild(gameItem);
-        });
-        }
 
         function displayGameDetail(game) {
             const gameDetail = document.getElementById('gameDetail');
