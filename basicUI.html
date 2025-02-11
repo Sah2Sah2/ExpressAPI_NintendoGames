@@ -101,6 +101,7 @@
         }
 
         .game-item {
+            color: #ff4d4d;
             background: #000;
             padding: 15px;
             margin-bottom: 15px;
@@ -216,52 +217,72 @@
         }
 
         function fetchGameByName() {
-            const gameName = document.getElementById('gameName').value;
-            if (!gameName) {
-                showError('Please enter a game name.');
-                return;
-            }
-
-            showLoading();
-            fetch(`${API_URL}/${encodeURIComponent(gameName)}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Game not found');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    hideLoading();
-                    displayGameDetail(data);
-                })
-                .catch(error => {
-                    hideLoading();
-                    showError(error.message);
-                    document.getElementById('gameDetail').innerHTML = '';
-                });
+        const gameName = document.getElementById('gameName').value.trim(); // Trim spaces
+        if (!gameName) {
+            showError('Please enter a game name.');
+            return;
         }
 
-        function displayGames(games) {
-            const gameList = document.getElementById('gameList');
-            gameList.innerHTML = '';
-            
-            if (games.length === 0) {
-                gameList.innerHTML = '<p>No games found.</p>';
-                return;
-            }
+        showLoading();
+        const searchUrl = `https://nintendogamesminimalapi.azurewebsites.net/game?name=${encodeURIComponent(gameName.toLowerCase())}`; // Convert to lowercase and encode
+        console.log("Search URL:", searchUrl); // Log the search URL to inspect it
 
-            games.forEach(game => {
-                const gameItem = document.createElement('div');
-                gameItem.className = 'game-item';
-                gameItem.innerHTML = `<strong>${game.name}</strong><p>${game.description}</p>`;
-                gameList.appendChild(gameItem);
+        // Clear previous game details
+        document.getElementById('gameDetail').innerHTML = '';
+
+        fetch(searchUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Game not found');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("API Response:", data); // Log the API response to check the data structure
+                hideLoading();
+                if (data.length > 0) { // Check if the array contains any games
+                    displayGameDetail(data[0]); // Display the first game if it's found
+                } else {
+                    showError('Game not found.');
+                    document.getElementById('gameDetail').innerHTML = '';
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                showError(error.message);
+                document.getElementById('gameDetail').innerHTML = '';
             });
+        }
+
+
+        function displayGames(games) {
+        const gameList = document.getElementById('gameList');
+        gameList.innerHTML = '';
+        
+        if (games.length === 0) {
+            gameList.innerHTML = '<p>No games found.</p>';
+            return;
+        }
+
+        games.forEach(game => {
+            const gameItem = document.createElement('div');
+            gameItem.className = 'game-item';
+            // Check if the 'name' field exists and is valid
+            const gameName = game.name || "Unknown Name";  // Fallback in case name is undefined
+            gameItem.innerHTML = `<strong>${gameName}</strong>`;
+            gameList.appendChild(gameItem);
+        });
         }
 
         function displayGameDetail(game) {
             const gameDetail = document.getElementById('gameDetail');
-            gameDetail.innerHTML = `<h2>${game.name}</h2><p>${game.description}</p>`;
+
+            // Only display the game name
+            const gameName = game.name || "Unknown Game Name";
+
+            gameDetail.innerHTML = `<h2>${gameName}</h2>`;
         }
+
 
         function addNewGame() {
             const newGameName = document.getElementById('newGameName').value;

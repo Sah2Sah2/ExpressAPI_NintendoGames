@@ -37,10 +37,10 @@ app.get('/game', (req, res) => {
 
 // Get a specific game by name
 app.get('/game/:name', (req, res) => {
-    const gameName = req.params.name;
-
-    // Send request to the .NET API with the query parameter
-    https.get(`${DOTNET_API_URL}/game?name=${gameName}`, (response) => {
+    const gameName = req.params.name; // Get the game name from the URL path
+    
+    // Update the API request to send the game name as a query parameter
+    https.get(`${DOTNET_API_URL}/game?name=${encodeURIComponent(gameName)}`, (response) => {
         let data = '';
 
         response.on('data', (chunk) => {
@@ -49,7 +49,7 @@ app.get('/game/:name', (req, res) => {
 
         response.on('end', () => {
             if (response.statusCode === 200) {
-                res.status(200).json(JSON.parse(data)); // Sending back the data from the .NET API
+                res.status(200).json(JSON.parse(data)); // Send back the data from the .NET API
             } else if (response.statusCode === 404) {
                 res.status(404).send(`Game with name '${gameName}' not found`);
             } else if (response.statusCode === 400) {
@@ -63,6 +63,7 @@ app.get('/game/:name', (req, res) => {
         res.status(500).send('Error fetching game data');
     });
 });
+
 
 
 // Add a new game to the .NET API
