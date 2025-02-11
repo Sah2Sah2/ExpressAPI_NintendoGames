@@ -161,11 +161,11 @@
 
         <!-- Get All Games -->
         <div class="endpoint">
-            <h3>GET /game</h3>
+            <h3>GET /games</h3>
             <p>Fetch a list of all Nintendo games from the database.</p>
             <div class="request-response">
                 <strong>Request:</strong>
-                <code>GET /game</code>
+                <code>GET /games</code>
             </div>
             <div class="request-response">
                 <strong>Response:</strong>
@@ -196,7 +196,8 @@
             <p>Retrieve a specific Nintendo game by its name from the database.</p>
             <div class="request-response">
                 <strong>Request:</strong>
-                <code>GET /game/Super%20Mario%20Odyssey</code>
+                <code>GET /game?name=Super%20Mario%20Odyssey
+                </code>
             </div>
             <div class="request-response">
                 <strong>Response:</strong>
@@ -227,6 +228,10 @@
             <div class="request-response">
                 <strong>Request:</strong>
                 <code>POST /game</code>
+                <p>Headers:</p>
+                <pre>
+        Content-Type: application/json
+                </pre>
                 <p>Body:</p>
                 <pre>
 {
@@ -247,7 +252,8 @@ Game successfully added to the .NET API!
                 <strong>Possible Errors:</strong>
                 <ul>
                     <li><strong>400:</strong> Missing required fields (name, genre, releaseYear, developer).</li>
-                    <li><strong>500:</strong> Server issues when adding the game.</li>
+                     <li><strong>500:</strong> Error connecting to the .NET API.</li>
+                    <li><strong>Other status codes:</strong> Forwarded from the .NET API if the request fails.</li>
                 </ul>
             </div>
         </div>
